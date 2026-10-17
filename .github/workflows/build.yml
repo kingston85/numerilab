@@ -36,10 +36,16 @@ jobs:
         run: flutter pub get
 
       - name: Analyze
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee analyze.log
 
       - name: Test
-        run: flutter test
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test 2>&1 | tee test.log
 
       - name: Build release APK
         shell: bash
@@ -51,6 +57,14 @@ jobs:
         if: failure()
         shell: bash
         run: |
+          if [ -f analyze.log ] && grep -q "error •" analyze.log; then
+            msg=$(grep "error •" analyze.log | head -40 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Analyzer errors::${msg}"
+          fi
+          if [ -f test.log ] && grep -qE "Some tests failed|\[E\]|Expected:" test.log; then
+            msg=$(grep -n -B2 -A12 -E "\[E\]|Expected:" test.log | head -150 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Test failures::${msg}"
+          fi
           if [ -f build.log ]; then
             msg=$(grep -n -A40 -E "What went wrong|error:|Error:|FAILURE" build.log | head -120 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
             echo "::error title=Gradle build failed::${msg}"
