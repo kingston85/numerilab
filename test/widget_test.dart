@@ -164,8 +164,8 @@ void main() {
 
   group('Fitting', () {
     test('Chapra 17.1 linear regression', () {
-      final x = [1.0, 2, 3, 4, 5, 6, 7];
-      final y = [0.5, 2.5, 2.0, 4.0, 3.5, 6.0, 5.5];
+      final x = <double>[1.0, 2, 3, 4, 5, 6, 7];
+      final y = <double>[0.5, 2.5, 2.0, 4.0, 3.5, 6.0, 5.5];
       final f = Fitting.fit(FitModel.linear, x, y);
       expect(f.coeffs[0], closeTo(0.0714286, 1e-6));
       expect(f.coeffs[1], closeTo(0.8392857, 1e-6));
@@ -173,7 +173,7 @@ void main() {
       expect(f.syx, closeTo(0.7735, 1e-4));
     });
     test('polynomial recovers an exact quadratic', () {
-      final x = [0.0, 1, 2, 3, 4, 5];
+      final x = <double>[0.0, 1, 2, 3, 4, 5];
       final y = [for (final v in x) 2 - 3 * v + 0.5 * v * v];
       final f = Fitting.fit(FitModel.polynomial, x, y, degree: 2);
       expect(f.coeffs[0], closeTo(2, 1e-9));
@@ -182,24 +182,24 @@ void main() {
       expect(f.r2, closeTo(1, 1e-12));
     });
     test('exponential and power fits', () {
-      final x = [0.0, 1, 2, 3];
+      final x = <double>[0.0, 1, 2, 3];
       final y = [for (final v in x) 5 * math.exp(-0.4 * v)];
       final e = Fitting.fit(FitModel.exponential, x, y);
       expect(e.coeffs[0], closeTo(5, 1e-9));
       expect(e.coeffs[1], closeTo(-0.4, 1e-9));
-      final px = [1.0, 2, 3, 4];
+      final px = <double>[1.0, 2, 3, 4];
       final p = Fitting.fit(FitModel.power, px, [for (final v in px) 2 * math.pow(v, 1.5).toDouble()]);
       expect(p.coeffs[0], closeTo(2, 1e-9));
       expect(p.coeffs[1], closeTo(1.5, 1e-9));
     });
     test('Lagrange, Newton and spline interpolation', () {
-      final x = [1.0, 4, 6];
-      final y = [0.0, 1.386294, 1.791759]; // ln x
+      final x = <double>[1.0, 4, 6];
+      final y = <double>[0.0, 1.386294, 1.791759]; // ln x
       expect(Fitting.lagrange(x, y, 2), closeTo(0.5658444, 1e-6)); // Chapra 18.2
       final t = Fitting.dividedDifferences(x, y);
       expect(Fitting.newtonEval(x, t, 2), closeTo(0.5658444, 1e-6));
-      final sx = [0.0, 1, 2, 3];
-      final sy = [0.0, 1, 8, 27];
+      final sx = <double>[0.0, 1, 2, 3];
+      final sy = <double>[0.0, 1, 8, 27];
       final m2 = Fitting.splineSecondDerivs(sx, sy);
       expect(Fitting.splineEval(sx, sy, m2, 1), closeTo(1, 1e-12));
       expect(m2.first, 0);
